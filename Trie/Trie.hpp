@@ -18,8 +18,8 @@ public:
     typedef basic_string<E> key_type;                   // string=basic_string<char>
     typedef pair<const key_type, T> value_type;
     typedef T mapped_type;
-    class inner_node;
-    class base_node;
+    class InnerNode;
+    class BaseNode;
     
     //typedef ... iterator;
     
@@ -33,45 +33,85 @@ public:
     iterator begin();                                   // returns end() if not found
     iterator end();
     
-    class base_node {
+    //Class for the Nodes
+    
+    /*
+     * BaseNode Class: Base Class for a node with a pointer on the fatherPointer.
+     */
+    class BaseNode {
         
     public:
-        //base_node(inner_node* pParent = 0) : ptrParent(pParent) {}
+        BaseNode(InnerNode* father = 0) : pFather(father){}
         
-        virtual ~base_node() {}
+        virtual ~BaseNode() {}
         
-//        inner_node* &parent() {
-//            return ptrParent;
-//        }
+        InnerNode* getParent() {
+            return pFather;
+        }
         
-        //virtual void print(int level) = 0;
+        void setParent(InnerNode& parent) {
+            pFather = parent;
+        }
+        
+        virtual void print(int level) = 0;
         
     private:
-        inner_node* ptrParent;
-        
+        InnerNode* pFather;
     };
     
-    class inner_node : public base_node {
+    //InnerNode Class: Describes the inner nodes of the Trie.
+    //				   Letters which have their origin in this node, and the node itself are saved in the map.
+    
+    class InnerNode : public BaseNode {
         
     public:
-        //inner_node(inner_node* pParent = 0) : base_node(pParent) {}
+        /*
+         * Constructor InnerNode and BaseNode with fatherPointer = 0
+         */
+        InnerNode(InnerNode* ) : BaseNode() {
+        };
         
-
+        /*
+         * Constructor InnerNode with map, inserts and the BaseNode
+         */
+        InnerNode(std::map<E, BaseNode*> _map, BaseNode *father) : BaseNode(father) {
+            map = _map;
+        }
+        
+        ~InnerNode() {
+            map.clear();
+        }
+        
+        map<E, BaseNode*> getMap() {
+            return map;
+        }
         
     private:
-        map<E, base_node*> children;
+        map<E, BaseNode*> children;
     };
     
-    class leaf_node : public base_node {
+    //LeafNode Class: Describes the leafs where the english words are saved.
+    class LeafNode: public BaseNode {
+        friend class Trie;
         
     public:
         
-    private:
+        LeafNode(T word, BaseNode *father) : BaseNode(father){
+            value = word;
+        }
         
+        virtual ~LeafNode() {}
+        
+        T& getValue() {
+            return value;
+        }
+        
+    private:
+        T value;
     };
     
 private:
-    inner_node root;
+    InnerNode root;
 };
 
 #endif /* Trie_hpp */
